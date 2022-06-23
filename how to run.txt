@@ -1,0 +1,26 @@
+1. signaling server, at sender side
+x.x.x.x = machine ip
+./simple_server.py --addr 'x.x.x.x' --disable-ssl
+2. receiver side
+cd page
+python3 -m http.server
+go to chrome: localhost:8000
+3. sender side: run gl app
+cd src under camera folder
+make gl_keyboard
+export MESA_GL_VERSION_OVERRIDE=3.3
+./gl_keyboard
+4. sender side
+Compile steps for webrtc-sendrecv
+git clone https://gitlab.freedesktop.org/gstreamer/cerbero
+cd cerbero
+./cerbero-uninstalled bootstrap
+./cerbero-uninstalled package gstreamer-1.0
+./cerbero-uninstalled shell
+cd gstreamer
+make
+
+===how to get window id xxxx..xx below===
+xdotool search opengl
+y.y.y.y = machine ip of sender
+./webrtc-sendrecv --peer-id=1000 --window-id=$(xdotool search opengl) --server="ws://0.0.0.0:8443" --disable-ssl true
