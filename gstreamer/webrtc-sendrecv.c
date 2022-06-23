@@ -26,7 +26,8 @@
 // MUZ
 const unsigned int imgWidth = 800;
 const unsigned int imgHeight = 600;
-size_t bufferSize = imgHeight * 3 * imgWidth;  
+const size_t bufferSize = imgHeight * 3 * imgWidth;
+const int fps = 60;  
 
 
 enum AppState
@@ -457,13 +458,6 @@ start_pipeline (gboolean create_offer)
   ///////////////////////////////////////
   // Muz start
 
-  CustomData pipelineData;
-  memset(&pipelineData, 0, sizeof(pipelineData)); // init the structure
-  pipelineData.nFrame = 0;
-  pipelineData.frameSizeBytes = bufferSize;
-  pipelineData.fps = 60;
-  pipelineData.pSharedMem = pSharedMem;
-
   ///////////////////////////////////////
   // Make gstreamer pipeline 
   ///////////////////////////////////////
@@ -472,11 +466,11 @@ start_pipeline (gboolean create_offer)
     "webrtcbin bundle-policy=max-bundle name=sendrecv "
       STUN_SERVER
       "appsrc is-live=false emit-signals=true name=appsrc0"
-      " ! video/x-raw, width=%d, height=%d, framerate=60/1, format=BGR ! videoconvert ! queue ! "
+      " ! video/x-raw, width=%d, height=%d, framerate=%d/1, format=BGR ! videoconvert ! queue ! "
       "vp8enc deadline=1 keyframe-max-dist=2000 ! "
       /* picture-id-mode=15-bit seems to make TWCC stats behave better */
       "rtpvp8pay name=videopay picture-id-mode=15-bit ! "
-      "queue ! " RTP_CAPS_VP8 "96 ! sendrecv. ", imgWidth, imgHeight);
+      "queue ! " RTP_CAPS_VP8 "96 ! sendrecv. ", imgWidth, imgHeight, fps);
 
   // Muz end
 
@@ -507,7 +501,7 @@ start_pipeline (gboolean create_offer)
   // Muz start
   GstElement *appsrc = gst_bin_get_by_name (GST_BIN (pipe1), "appsrc0");  // get element out of pipeline by name
   g_object_set(appsrc, "format", GST_FORMAT_TIME, NULL); 
-  g_signal_connect (appsrc, "need-data", G_CALLBACK (appsrc_get_data_cb), &pipelineData);  // attach need-data callback 
+  g_signal_connect (appsrc, "need-data", G_CALLBACK (appsrc_get_data_cb), NULL);  // attach need-data callback 
  
 
   // Muz end
